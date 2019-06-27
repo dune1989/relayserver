@@ -17,15 +17,97 @@
       var idx = '';
       var global_temp_users = '';
       var websocket = null;
-      var socket_host = 'https://dune1989.github.io/relayserver/';
+      var socket_host = '172.21.95.210';
       var socket_port = '9996';
       var wsretry = null;
       var user = global_username;
       var users = [];
       var websocket_worker = null;
       var checker;
+	  
+      //webRTC
+      var configuration = {
+	 iceServers: [
+	  {urls:"stun:stun.l.google.com:19302"},
+	  {
+	   urls: 'turn:172.21.76.10:3478',
+	   username: 'test',
+	   credential: 'test'
+	 }]
+      };
+
+      function onSuccess() {};
+      function onError(error) {
+	  console.log(error);
+      };
+
+      function hasGetUserMedia() {
+	  return !!(navigator.mediaDevices &&
+	    navigator.mediaDevices.getUserMedia);
+      }
+
+      function gotDevices(deviceInfos) {
+	  if(deviceInfos.length==0) {
+	      alert("Your device has no media!"); 
+	      document.location.href = "/";
+	  }
+	  for (let i = 0; i !== deviceInfos.length; ++i) {
+	    const deviceInfo = deviceInfos[i];
+	    console.log('Found device: ', deviceInfo);
+	  }
+      }
+
+      let connection = null
+      let pc = [];
+      let name = null
+      let localStream
+      var sdpmsg = [];
+      var yourVideo = document.getElementById("localVideo");
+      var friendsVideo = document.getElementById("remoteVideo");
+      var offerecv = [];
+      var ownstream = null;
+      var checker;
+      var negotiating = [];
+      var mediaStreamSource = [];
+      var audprocessor = [];
+      var audioContext = [];	  
       
-      $(document).ready(function(){	  
+      $(document).ready(function(){
+	  
+	   if(global_username=="") {
+		var person = prompt("Please enter your name", "");
+		if (person != null) {
+		  global_username = person;
+		  user = global_username;
+		} else if($.trim(person)=="") {
+		    alert("Please enter name!"); 
+		    document.location.href = "/";
+		}
+   	  }
+	      
+	  users.push(user);
+	  if (!Notification) {
+		alert('Desktop notifications not available in your browser. Try Chromium.'); 
+		return;
+	  }
+
+	  if (Notification.permission !== "granted")
+	      Notification.requestPermission();
+
+	  var tmpusrname = user.split("_");
+	  $("#user_list_dtl").append("<li id='user_list_dtl_"+user+"'>"+tmpusrname[0]+"</li>"); 
+
+	  if (!hasGetUserMedia()) {
+	       alert('getUserMedia() is not supported by your browser');
+	       document.location.href = redirect;
+	  }
+
+          navigator.mediaDevices.enumerateDevices()
+          .then(gotDevices).catch(onError);
+
+          navigator.mediaDevices.getUserMedia({audio:true, video:true})
+          .then(ownstream => yourVideo.srcObject = ownstream);
+	      
 	  //create a new WebSocket object.
 	  var wsUri = "wss://connect.websocket.in/rtctrial?room_id=generalroom"; 	
 	  websocket = null;
@@ -44,10 +126,197 @@
               try {
 		  //PHP sends Json data
 	          var msg = JSON.parse(ev.data);
-	          //console.log(JSON.stringify(msg));
 	          var obj;
                   if (typeof msg.data!="undefined") {
-		      console.log(msg);	  
+		      var msgdata = msg.data;
+		      var msguserid = msgdata.id;
+		      var msgto = msgdata.to;
+		      //console.log("message to: "+msgto)
+	              if($("#user_list_dtl_"+msguserid).length <= 0 || $("#video"+msguserid).length==0) {
+			    if((typeof pc[msguserid]=="undefined" || pc[msguserid]==null) && msguserid!=global_username) {
+				//notifyMe("Geetings - "+msguserid+" joined", msguserid + " joined "+global_channel);
+				console.log("creating RTCPeerConnection for " + msguserid)
+				remove_user_element(msguserid)
+
+				negotiating[msguserid] = false;
+				pc[msguserid] = new RTCPeerConnection(configuration);
+				if($("#video"+msguserid+"_"+global_username).length==0) {
+				    add_videobox(msguserid+"_"+global_username, "hide")                
+				}
+				if($("#video"+msguserid).length==0) {
+				    add_videobox(msguserid, "")                
+				}
+				let _tempVideo = document.getElementById("video"+msguserid+"_"+global_username);
+				let _tempStream;
+				navigator.mediaDevices.getUserMedia({audio:true, video:false})
+				.then(thestream => _tempVideo.srcObject = thestream)
+				.then(thestream => pc[msguserid].addStream(thestream))
+				.then(() => {
+				    pc[msguserid].onicecandidate = function(event) {
+					console.log(event.candidate);
+					if(event.candidate) {
+					    send_data({'type':'ice', 'ice': event.candidate}, msguserid)
+					}
+				    }
+				    $("#user_list_dtl").append("<li id='user_list_dtl_"+msguserid+"'>"+msguserid+"</li>");   
+				    pc[msguserid].onsignalingstatechange = (e) => {  // Workaround for Chrome: skip nested negotiations
+					if(pc[msguserid]!=null && typeof pc[msguserid].signalingState!="undefined" && pc[msguserid].signalingState!=null) {
+					    console.log("signalingState " + msguserid + " " + pc[msguserid].signalingState)
+					    negotiating[msguserid] = pc[msguserid].signalingState;//(pc[msguserid].signalingState != "stable");
+					}
+					//have-local-offer
+				    }
+
+				    pc[msguserid].onconnectionstatechange = function(event) {
+					try {
+					    switch(pc[msguserid].connectionState) {
+					      case "connected":
+						// The connection has become fully connected
+						console.log("RTCPeerConnection connected for "+msguserid)                                            
+						break
+					      case "disconnected":
+						console.log("RTCPeerConnection disconnected for "+msguserid)
+						remove_user_element(msguserid)
+						break
+					      case "failed":
+						console.log("RTCPeerConnection failed for "+msguserid)
+						remove_user_element(msguserid)
+						break
+					      case "closed":
+						console.log("RTCPeerConnection closed for "+msguserid)
+						remove_user_element(msguserid)
+
+						// The connection has been closed
+						break
+					    }
+					} catch(err) {console.log(err)}
+				    }
+
+				    pc[msguserid].onaddstream = (event) => {
+					try {
+					    if(event.stream) {                                    
+					       $("#video"+msguserid).show();
+					       var streams = pc[msguserid].getRemoteStreams();
+					       for (var stream of streams) {
+						  console.log("Remote streams: " + msguserid); //stream.id
+						  if($("#video"+msguserid).length==0) {
+						      add_videobox(msguserid, "")                
+						  }
+						  let _friendsVideo = document.getElementById("video"+msguserid);
+						  _friendsVideo.srcObject = stream;
+						    /*audioContext[msguserid] = new AudioContext();
+						    mediaStreamSource[msguserid] = audioContext[msguserid].createMediaStreamSource(stream);
+						    audprocessor[msguserid] = audioContext[msguserid].createScriptProcessor(2048, 1, 1);
+						    mediaStreamSource[msguserid].connect(audioContext[msguserid].destination);
+						    mediaStreamSource[msguserid].connect(audprocessor[msguserid]);
+						    audprocessor[msguserid].connect(audioContext[msguserid].destination);
+						    audprocessor[msguserid].onaudioprocess = function (e) {
+							let inputData = e.inputBuffer.getChannelData(0);
+							let inputDataLength = inputData.length;
+							let total = 0;
+							for (let i = 0; i < inputDataLength; i++) {
+							    total += Math.abs(inputData[i++]);
+							}
+
+							let rms = Math.sqrt(total / inputDataLength);
+							updateMeter(msguserid, rms * 100);
+						    };*/
+					       }
+					    } 
+					    else {
+						pc[msguserid].createOffer()
+					       .then(offer => pc[msguserid].setLocalDescription(offer) )
+					       .then(() => send_sdp(JSON.stringify(pc[msguserid].localDescription), msguserid))
+					    }
+					} catch(err) { console.log(err) }   
+				    }                           
+
+				})
+				.then(() => {
+				    if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
+					try {             
+
+					pc[msguserid].createOffer()
+					.then(offer => pc[msguserid].setLocalDescription(offer) )
+					.then(() => send_sdp(JSON.stringify(pc[msguserid].localDescription), msguserid))
+					.then(() => console.log("offer sent to: "+msguserid))
+					.then(() => {
+					    setTimeout(function(){
+						pc[msguserid].createOffer()
+						.then(offer => pc[msguserid].setLocalDescription(offer) )
+						.then(() => send_sdp(JSON.stringify(pc[msguserid].localDescription), msguserid))
+						console.log("offer sent again to: "+msguserid)
+						//$("#connect"+msguserid).hide();
+					    }, 5000)
+					})
+
+					pc[msguserid].onnegotiationneeded = function () {
+					    pc[msguserid].createOffer()
+					    .then(offer => { try { pc[msguserid].setLocalDescription(offer) } catch(err) { } })
+					    .then(() => {
+						    try {
+							send_sdp(JSON.stringify(pc[msguserid].localDescription), msguserid)
+						    } catch(err) { } 
+						}
+					    )
+					    console.log("onnegotiationneeded offer sent to: "+msguserid)
+					}
+
+					} catch(err) { console.log(err) }            
+				    }
+				})
+			    }                    
+			}
+			
+			if (typeof msgdata.datas!="undefined") {
+			    var datas = [];
+			    try { 
+				datas = JSON.parse(msgdata.datas);
+			    }
+			    catch (err) { console.log("websocket.onmessage 1 - " + err); }
+			    if (datas.message!=undefined) { //message 
+
+			    } else if(datas.checkin!=undefined) {
+				obj = datas.checkin;
+
+				//console.log("total user:"+users.length);
+				//if(users.length>1) {
+
+				//}
+				if(typeof obj["user"]!="undefined" && typeof obj["username"]!="undefined" && obj["user"]!=global_username) {                              
+				    //setTimeout(function(){ send_indentity(); }, 500);                              
+				    //self.postMessage({"action":"onmessage", "data":{"type":"checkin","obj":obj}});
+				}
+			    } else {
+				obj = datas;
+				console.log(obj.type + " " + msguserid + " => " + msgto);
+				if(msgto==global_username) {
+				    switch (obj.type) {
+					case 'ice':
+					  console.log("ice received " + JSON.stringify(obj.ice));
+					  if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null) {
+
+					    $("#answer"+msguserid).show();
+					    try {
+						var tempicedata = JSON.parse(obj.ice);     
+						if(typeof tempicedata.result!="undefined" && tempicedata!=undefined && tempicedata.result==true) {
+						    pc[msguserid].addIceCandidate(tempicedata);
+						    console.log("addIceCandidate " + msguserid);
+						}
+					    } catch(err) { }
+
+					  }
+					  break
+					case 'sdp':
+					  get_sdp(obj.id);
+					  break 
+					default:
+					  break
+				      }
+				  }
+			    }
+			}  
+	  
 	          } else if (msg.disconnect!=undefined) {
                       obj = msg.disconnect;   
                       var msguserid = obj.user;
@@ -79,6 +348,21 @@
 	 }, 5000);     
       });
 	  
+      function notifyMe(title, msg) {
+	  if (Notification.permission !== "granted")
+	    Notification.requestPermission();
+	  else {
+	    var notification = new Notification(title, {
+	      icon: '',
+	      body: msg,
+	    });
+
+	    notification.onclick = function () {
+	      //window.open("http://stackoverflow.com/a/13328397/1269037");      
+	    };
+	  }
+	}	  
+	  
       function remove_user_element(userid) {
 	   try { 
 	       pc[userid].close() 
@@ -92,7 +376,188 @@
 	       audprocessor[userid] = null;
 	       audioContext[userid] = null;
 	   } catch(err) {}
-      }	  
+      }
+	
+      function updateMeter(id, pct) {
+	  var meter = $("div.meter_"+id);
+	  meter.css("width", pct + '%');
+      }
+	  
+      function add_videobox(id, _class) {
+	    var muted = (_class=="hide")? "muted" : "";
+	    var html = "<div class=\"col-md-3 videobox "+_class+"\" id='videobox"+id+"'>\
+		<div class=\"thumbnail\">\
+		  <video id='video"+id+"' autoplay controls "+muted+"></video>\
+		    <div class=\"meterGraph\">\
+		    <div class=\"meter meter_"+id+"\"></div>\
+		    </div>\
+		  <div class=\"caption\">\
+		    <h3>"+id+"</h3>\
+		    <button class=\"btn btn-default\" type=\"button\" id='connect"+id+"'>Connect</button>\
+		    <button class=\"btn btn-default\" type=\"button\" id='answer"+id+"' style='display:none'>Refresh</button>\
+		  </div>\
+		</div>\
+	    </div>";
+	    $("#remoteViewContainer").append(html);
+	    $("#connect"+id).click(function(){
+		if(typeof pc[id]!="undefined" && pc[id]!=null && negotiating[id]!="have-local-offer") {
+		    try {             
+
+		    pc[id].createOffer()
+		    .then(offer => pc[id].setLocalDescription(offer) )
+		    .then(() => send_sdp(JSON.stringify(pc[id].localDescription), id))
+		    .then(() => console.log("offer sent to: "+id))
+		    .then(() => {
+			setTimeout(function(){
+			    pc[id].createOffer()
+			    .then(offer => pc[id].setLocalDescription(offer) )
+			    .then(() => send_sdp(JSON.stringify(pc[id].localDescription), id))
+			    console.log("offer sent again to: "+id)
+			    $("#connect"+id).hide();
+			}, 5000)
+		    })
+
+		    pc[id].onnegotiationneeded = function () {
+			pc[id].createOffer()
+			.then(offer => pc[id].setLocalDescription(offer) )
+			.then(() => send_sdp(JSON.stringify(pc[id].localDescription), id))
+			console.log("onnegotiationneeded offer sent to: "+id)
+		    }
+
+		    } catch(err) { console.log(err) }            
+		}
+
+		$("#answer"+id).show();
+	    })
+
+	    $("#answer"+id).click(function(){
+		try {
+		    console.log("Remote streams (answer btn): " + id);
+		    $("#video"+id).show();
+		      var streams = pc[id].getRemoteStreams();
+		      for (var stream of streams) {
+			if($("#video"+id).length==0) {
+			  add_videobox(id, "")
+			}    
+			let _friendsVideo = document.getElementById("video"+id);
+			if(stream) {
+			    _friendsVideo.srcObject = stream;
+			    $("#video"+id).show();
+			}
+		      }
+		} catch(err) {console.log(err)}
+	    })
+	}
+	  
+      function send_sdp(sdp_data, to) {
+	    $.ajax({
+		url: "?t=empty&app=rtc/sdp&push=1",
+		type: "POST",
+		dataType: 'text',
+		data: {id: global_username, sdp: JSON.stringify(sdp_data)},
+		async:true,
+		success: function(msg){
+		    try {                        
+			if(msg=="OK") {
+			    //console.log("OK");
+			    send_data({type: 'sdp', id: global_username}, to);
+			}
+		    }
+		    catch (err) { console.log(err) }
+
+		}, 
+		error:function() { 
+		},
+		fail : function() {
+		},
+		timeout : function() { 
+		},
+		abort : function() {
+		}
+	    });
+	}
+	 
+      function get_sdp(userid) {
+	    $.ajax({
+		url: "?t=empty&app=rtc/sdp&get=1",
+		type: "POST",
+		dataType: 'text',
+		data: {id: userid},
+		async:true,
+		success: function(msg){
+		    try {               
+			let data = JSON.parse(msg);
+			//console.log("OK");
+			//console.log(data)
+			data = JSON.parse(data);
+			console.log("sdp type " + data.type)
+			try {
+			    //data.sdp = data.sdp.replace("a=setup:active", "a=setup:passive");
+			} catch(err) { console.log(err) }
+
+			if(typeof data.type != "undefined" && data.type=="offer") {
+			    console.log("offer received " + negotiating[userid])
+			    $("#connect"+userid).hide();
+			    $("#answer"+userid).show();
+			    if(typeof pc[userid]!="undefined" && pc[userid]!=null && negotiating[userid]!="have-local-offer") {
+
+			     try { 
+				pc[userid].setRemoteDescription(data) //new RTCSessionDescription(data)
+				   .then(() => pc[userid].createAnswer())
+				   .then(answer => pc[userid].setLocalDescription(answer))
+				   .then(() => send_sdp(JSON.stringify(pc[userid].localDescription), userid))
+				   .then(() => {
+				       console.log("answer given to): " + userid);
+				       console.log("Remote streams (get_sdp -answer): " + userid);
+					 $("#video"+userid).show();
+					 var streams = pc[userid].getRemoteStreams();
+					 for (var stream of streams) {
+					   if($("#video"+userid).length==0) {
+					     add_videobox(userid, "")
+					   }    
+					   let _friendsVideo = document.getElementById("video"+userid);
+					   if(stream) {
+					       _friendsVideo.srcObject = stream;                                       
+					   }
+					 }
+				   })
+				} catch(err) { console.log(err) }
+			    }
+			}
+			if(typeof data.type != "undefined" && data.type=="answer") {
+			    console.log("answer received " + negotiating[userid])
+			    if(typeof pc[userid]!="undefined" && pc[userid]!=null) { // && negotiating[userid]!="stable"
+				try {  
+				pc[userid].setRemoteDescription(data).then(()=> {
+				    $("#video"+userid).show();
+				    var streams = pc[userid].getRemoteStreams();
+				    for (var stream of streams) {
+					console.log("Remote streams (get_sdp): " + userid);
+					if($("#video"+userid).length==0) {
+					  add_videobox(userid, "")
+					}
+					let _friendsVideo = document.getElementById("video"+userid);
+					_friendsVideo.srcObject = stream;      
+					$("#video"+userid).show();
+				    }
+				}) //new RTCSessionDescription(data)
+				} catch(err) { console.log(err) }
+			    }
+			}
+		    }
+		    catch (err) { console.log(err) }
+
+		}, 
+		error:function() { 
+		},
+		fail : function() {
+		},
+		timeout : function() { 
+		},
+		abort : function() {
+		}
+	    });
+	}	  
  
       function register_zone() {        
 	    var msg = {"command":{"identify":global_username, "zone":global_channel}};
