@@ -7,6 +7,7 @@
     <title>webRTC Testing</title>
   </head>
   <body>
+  <p>Relay Server is running...</p>	  
   <script>
       //initialize variables
       var global_username = '';
@@ -29,7 +30,7 @@
 
       websocket = new WebSocket(wsUri);
       
-      wss.on('connection', function(connection) {
+      websocket.on('connection', function(connection) {
   
       console.log("User connected");
 	
@@ -52,21 +53,14 @@
 
                 //if anyone is logged in with this username then refuse 
                 if(users[data.name]) { 
-                   sendTo(connection, { 
-                      type: "login", 
-                      success: false 
-                   }); 
+	           var arr = { type: "login", success: false };
                 } else { 
                    //save user connection on the server 
                    users[data.name] = connection; 
                    connection.name = data.name;
-
-                   sendTo(connection, { 
-                      type: "login", 
-                      success: true 
-                   }); 
+		   var arr = { type: "login", success: true };		
                 } 
-
+		websocket.send(JSON.stringify(arr)); 
                 break;
 
              case "offer": 
@@ -79,14 +73,9 @@
                 if(conn != null) { 
                    //setting that UserA connected with UserB 
                    connection.otherName = data.name; 
-
-                   sendTo(conn, { 
-                      type: "offer", 
-                      offer: data.offer, 
-                      name: connection.name 
-                   }); 
+		   var arr = { type: "offer", offer: data.offer, name: connection.name };
+		   websocket.send(JSON.stringify(arr));	
                 } 
-
                 break;
 
              case "answer": 
@@ -96,10 +85,8 @@
 
                 if(conn != null) { 
                    connection.otherName = data.name; 
-                   sendTo(conn, { 
-                      type: "answer", 
-                      answer: data.answer 
-                   });
+		   var arr = { type: "answer", answer: data.answer };		
+	           websocket.send(JSON.stringify(arr));		
                 } 
 
                 break;
