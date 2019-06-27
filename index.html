@@ -96,10 +96,8 @@
                 var conn = users[data.name];  
 
                 if(conn != null) { 
-                   sendTo(conn, { 
-                      type: "candidate", 
-                      candidate: data.candidate 
-                   }); 
+		   var arr = { type: "candidate", candidate: data.candidate };		
+	           websocket.send(JSON.stringify(arr));		
                 } 
 
                 break;
@@ -111,18 +109,15 @@
 
                 //notify the other user so he can disconnect his peer connection 
                 if(conn != null) { 
-                   sendTo(conn, { 
-                      type: "leave" 
-                   }); 
+	           var arr = { type: "leave" };		
+	           websocket.send(JSON.stringify(arr));		
                 }  
 
                 break;
 
-             default: 
-                sendTo(connection, { 
-                   type: "error", 
-                   message: "Command not found: " + data.type 
-                });
+             default:
+		var arr = { type: "error", message: "Command not found: " + data.type };		
+	        websocket.send(JSON.stringify(arr));
 
                 break; 
           }  
@@ -141,9 +136,8 @@
                 conn.otherName = null;  
 
                 if(conn != null) { 
-                   sendTo(conn, { 
-                      type: "leave" 
-                  }); 
+	           var arr = { type: "leave" };		
+	           websocket.send(JSON.stringify(arr));	 
                 }  
              } 
           } 
