@@ -43,7 +43,7 @@
 	  websocket.onmessage = function(ev) {
               try {
 		  //PHP sends Json data
-	          var msg = JSON.parse(message.data);
+	          var msg = JSON.parse(ev.data);
 	          //console.log(JSON.stringify(msg));
 	          var obj;
                   if (typeof msg.data!="undefined") {
