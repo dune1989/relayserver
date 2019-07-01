@@ -323,7 +323,7 @@
 						    try {
 							let tmpjson = [];
 							tmpjson.sdp = pc[msguserid].localDescription;
-							send_data(tmpjson, msguserid)
+							send_data(tmpjson, msguserid);
 						    } catch(err) { } 
 						}
 					    )
@@ -385,7 +385,9 @@
 						    pc[msguserid].setRemoteDescription(sdpstr.sdp) //new RTCSessionDescription(data)
 						       .then(() => pc[msguserid].createAnswer())
 						       .then(answer => pc[msguserid].setLocalDescription(answer))
-						       .then(() => { send_data(pc[msguserid].localDescription, msguserid)
+						       .then(() => { 	let tmpjson = [];
+									tmpjson.sdp = pc[msguserid].localDescription;
+									send_data(tmpjson, msguserid);
 								   })
 						       .then(() => {
 							   console.log("answer given to): " + msguserid);
@@ -529,7 +531,11 @@
 			setTimeout(function(){
 			    pc[id].createOffer()
 			    .then(offer => pc[id].setLocalDescription(offer) )
-			    .then(() => send_data(pc[id].localDescription, id))
+			    .then(() => { 
+				    		let tmpjson = [];
+						tmpjson.sdp = pc[id].localDescription;
+						send_data(tmpjson, id);
+					})
 			    console.log("offer sent again to: "+id)
 			    $("#connect"+id).hide();
 			}, 5000)
@@ -538,7 +544,11 @@
 		    pc[id].onnegotiationneeded = function () {
 			pc[id].createOffer()
 			.then(offer => pc[id].setLocalDescription(offer) )
-			.then(() => send_data(pc[id].localDescription, id))
+			.then(() => {	
+					let tmpjson = [];
+					tmpjson.sdp = pc[id].localDescription;
+					send_data(tmpjson, id);
+				    })
 			console.log("onnegotiationneeded offer sent to: "+id)
 		    }
 
