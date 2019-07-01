@@ -46,7 +46,7 @@
         height: 100%;
     }
 </style>
-<h1>Voice Communication - <?=$room?></h1>
+<h1>Voice Communication - Room 123</h1>
 <div id='terminal'></div>
 <ul id='user_list_dtl'>
  <li>Share the link to invite more people..</li>
@@ -673,6 +673,7 @@
 	  
       function send_data(msg, to) {
 	    msg = JSON.stringify(msg);
+	    console.log(msg);  
 	    var obj;
 	    if(to!='') {
 		obj = {"data":{"id":global_username, "zone":global_channel, "datas":msg, "to":to}};
