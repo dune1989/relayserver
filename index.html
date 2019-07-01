@@ -678,7 +678,7 @@
 	  
       function send_data(msg, to) {
 	    msg = JSON.stringify(msg);
-	    console.log(msg);  
+	    //console.log(msg);  
 	    var obj;
 	    if(to!='') {
 		obj = {"data":{"id":global_username, "zone":global_channel, "datas":msg, "to":to}};
