@@ -209,7 +209,7 @@
 				    pc[msguserid].onicecandidate = function(event) {
 					console.log(event.candidate);
 					if(event.candidate) {
-					    send_data({'type':'ice', 'ice': event.candidate}, msguserid)
+					    send_data({'type':'ice', 'ice': event.candidate}, msguserid);
 					}
 				    }
 				    $("#user_list_dtl").append("<li id='user_list_dtl_"+msguserid+"'>"+msguserid+"</li>");   
@@ -283,7 +283,7 @@
 					       .then(() => {
 							let tmpjson = [];
 							tmpjson.sdp = pc[msguserid].localDescription;
-							send_data(tmpjson, msguserid)
+							send_data(tmpjson, msguserid);
 						})
 					    }
 					} catch(err) { console.log(err) }   
@@ -298,13 +298,19 @@
 					//var sdpstr = JSON.parse(msgdata.datas);	
 					pc[msguserid].createOffer()
 					.then(offer => pc[msguserid].setLocalDescription(offer))
-					.then(() => send_data(pc[msguserid].localDescription, msguserid))
+					.then(() => { 	let tmpjson = [];
+							tmpjson.sdp = pc[msguserid].localDescription;
+							send_data(tmpjson, msguserid);
+						    })
 					.then(() => console.log("offer sent to: "+msguserid))
 					.then(() => {
 					    setTimeout(function(){
 						pc[msguserid].createOffer()
 						.then(offer => pc[msguserid].setLocalDescription(offer) )
-						.then(() => send_data(pc[msguserid].localDescription, msguserid))
+						.then(() => { 	let tmpjson = [];
+								tmpjson.sdp = pc[msguserid].localDescription;
+								send_data(tmpjson, msguserid);
+							    })
 						console.log("offer sent again to: "+msguserid)
 						//$("#connect"+msguserid).hide();
 					    }, 5000)
@@ -379,7 +385,8 @@
 						    pc[msguserid].setRemoteDescription(sdpstr.sdp) //new RTCSessionDescription(data)
 						       .then(() => pc[msguserid].createAnswer())
 						       .then(answer => pc[msguserid].setLocalDescription(answer))
-						       .then(() => send_data(pc[userid].localDescription, msguserid))
+						       .then(() => { send_data(pc[msguserid].localDescription, msguserid)
+								   })
 						       .then(() => {
 							   console.log("answer given to): " + msguserid);
 							   console.log("Remote streams (get_sdp -answer): " + msguserid);
