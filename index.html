@@ -289,11 +289,11 @@
 				.then(() => {
 				    if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
 					try {             
-				        console.log(negotiating[msguserid]);
-					console.log(msgdata);
-					var sdpstr = JSON.parse(msgdata.datas);	
+				        //console.log(negotiating[msguserid]);
+					//console.log(msgdata);
+					//var sdpstr = JSON.parse(msgdata.datas);	
 					pc[msguserid].createOffer()
-					.then(offer => pc[msguserid].setLocalDescription(sdpstr.sdp) )
+					.then(offer => pc[msguserid].setLocalDescription(offer))
 					.then(() => send_data(pc[msguserid].localDescription, msguserid))
 					.then(() => console.log("offer sent to: "+msguserid))
 					.then(() => {
@@ -366,7 +366,7 @@
 				        case 'offer':
 						console.log("offer received " + negotiating[msguserid]);
 						var sdpstr = JSON.parse(msgdata.datas);
-						console.log(sdpstr);
+						//console.log(sdpstr);
 						$("#connect"+msguserid).hide();
 						$("#answer"+msguserid).show();
 						try { 
