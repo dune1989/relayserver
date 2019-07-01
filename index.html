@@ -364,7 +364,7 @@
 				        case 'offer':
 						console.log("offer received " + negotiating[msguserid]);
 						var sdpstr = JSON.parse(msgdata.datas);
-						//console.log(sdpstr.sdp);
+						console.log(sdpstr);
 						$("#connect"+msguserid).hide();
 						$("#answer"+msguserid).show();
 						try { 
