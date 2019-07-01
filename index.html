@@ -280,7 +280,7 @@
 					    else {
 						pc[msguserid].createOffer()
 					       .then(offer => pc[msguserid].setLocalDescription(offer) )
-					       .then(() => send_sdp(JSON.stringify(pc[msguserid].localDescription), msguserid))
+					       .then(() => send_data(pc[msguserid].localDescription, msguserid))
 					    }
 					} catch(err) { console.log(err) }   
 				    }                           
@@ -292,13 +292,13 @@
 
 					pc[msguserid].createOffer()
 					.then(offer => pc[msguserid].setLocalDescription(offer) )
-					.then(() => send_sdp(JSON.stringify(pc[msguserid].localDescription), msguserid))
+					.then(() => send_data(pc[msguserid].localDescription, msguserid))
 					.then(() => console.log("offer sent to: "+msguserid))
 					.then(() => {
 					    setTimeout(function(){
 						pc[msguserid].createOffer()
 						.then(offer => pc[msguserid].setLocalDescription(offer) )
-						.then(() => send_sdp(JSON.stringify(pc[msguserid].localDescription), msguserid))
+						.then(() => send_data(pc[msguserid].localDescription, msguserid))
 						console.log("offer sent again to: "+msguserid)
 						//$("#connect"+msguserid).hide();
 					    }, 5000)
@@ -309,7 +309,7 @@
 					    .then(offer => { try { pc[msguserid].setLocalDescription(offer) } catch(err) { } })
 					    .then(() => {
 						    try {
-							send_sdp(JSON.stringify(pc[msguserid].localDescription), msguserid)
+							send_data(pc[msguserid].localDescription, msguserid)
 						    } catch(err) { } 
 						}
 					    )
@@ -361,9 +361,55 @@
 
 					  }
 					  break
-					case 'sdp':
+				        case 'offer':
+						console.log("offer received " + negotiating[msguserid]);
+						$("#connect"+msguserid).hide();
+						$("#answer"+msguserid).show();
+						try { 
+						    pc[msguserid].setRemoteDescription(msgdata) //new RTCSessionDescription(data)
+						       .then(() => pc[msguserid].createAnswer())
+						       .then(answer => pc[msguserid].setLocalDescription(answer))
+						       .then(() => send_data(pc[userid].localDescription, msguserid))
+						       .then(() => {
+							   console.log("answer given to): " + msguserid);
+							   console.log("Remote streams (get_sdp -answer): " + msguserid);
+							     $("#video"+userid).show();
+							     var streams = pc[msguserid].getRemoteStreams();
+							     for (var stream of streams) {
+							       if($("#video"+msguserid).length==0) {
+								 add_videobox(msguserid, "")
+							       }    
+							       let _friendsVideo = document.getElementById("video"+msguserid);
+							       if(stream) {
+								   _friendsVideo.srcObject = stream;                                       
+							       }
+							     }
+						       })
+						} catch(err) { console.log(err) }
+					      break
+					    case 'answer':
+						console.log("answer received " + negotiating[msguserid])
+						if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null) { // && negotiating[userid]!="stable"
+						    try {  
+						    pc[msguserid].setRemoteDescription(data).then(()=> {
+							$("#video"+msguserid).show();
+							var streams = pc[msguserid].getRemoteStreams();
+							for (var stream of streams) {
+							    console.log("Remote streams (get_sdp): " + msguserid);
+							    if($("#video"+msguserid).length==0) {
+							      add_videobox(msguserid, "")
+							    }
+							    let _friendsVideo = document.getElementById("video"+msguserid);
+							    _friendsVideo.srcObject = stream;      
+							    $("#video"+msguserid).show();
+							}
+						    }) //new RTCSessionDescription(data)
+						    } catch(err) { console.log(err) }
+						}
+					    break
+					/*case 'sdp':
 					  get_sdp(obj.id);
-					  break 
+					  break */
 					default:
 					  break
 				      }
@@ -459,13 +505,13 @@
 
 		    pc[id].createOffer()
 		    .then(offer => pc[id].setLocalDescription(offer) )
-		    .then(() => send_sdp(JSON.stringify(pc[id].localDescription), id))
+		    .then(() => send_data(pc[id].localDescription, id))
 		    .then(() => console.log("offer sent to: "+id))
 		    .then(() => {
 			setTimeout(function(){
 			    pc[id].createOffer()
 			    .then(offer => pc[id].setLocalDescription(offer) )
-			    .then(() => send_sdp(JSON.stringify(pc[id].localDescription), id))
+			    .then(() => send_data(pc[id].localDescription, id))
 			    console.log("offer sent again to: "+id)
 			    $("#connect"+id).hide();
 			}, 5000)
@@ -474,7 +520,7 @@
 		    pc[id].onnegotiationneeded = function () {
 			pc[id].createOffer()
 			.then(offer => pc[id].setLocalDescription(offer) )
-			.then(() => send_sdp(JSON.stringify(pc[id].localDescription), id))
+			.then(() => send_data(pc[id].localDescription, id))
 			console.log("onnegotiationneeded offer sent to: "+id)
 		    }
 
