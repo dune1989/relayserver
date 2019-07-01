@@ -364,11 +364,11 @@
 				        case 'offer':
 						console.log("offer received " + negotiating[msguserid]);
 						var sdpstr = JSON.parse(msgdata.datas);
-						console.log(sdpstr.sdp);
+						//console.log(sdpstr.sdp);
 						$("#connect"+msguserid).hide();
 						$("#answer"+msguserid).show();
 						try { 
-						    pc[msguserid].setRemoteDescription(msgdata) //new RTCSessionDescription(data)
+						    pc[msguserid].setRemoteDescription(sdpstr.sdp) //new RTCSessionDescription(data)
 						       .then(() => pc[msguserid].createAnswer())
 						       .then(answer => pc[msguserid].setLocalDescription(answer))
 						       .then(() => send_data(pc[userid].localDescription, msguserid))
@@ -391,9 +391,10 @@
 					      break
 					    case 'answer':
 						console.log("answer received " + negotiating[msguserid])
+						var sdpstr = JSON.parse(msgdata.datas);    
 						if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null) { // && negotiating[userid]!="stable"
 						    try {  
-						    pc[msguserid].setRemoteDescription(data).then(()=> {
+						    pc[msguserid].setRemoteDescription(sdpstr.sdp).then(()=> {
 							$("#video"+msguserid).show();
 							var streams = pc[msguserid].getRemoteStreams();
 							for (var stream of streams) {
