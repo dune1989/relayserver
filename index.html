@@ -363,7 +363,8 @@
 					  break
 				        case 'offer':
 						console.log("offer received " + negotiating[msguserid]);
-						console.log(msgdata);    
+						var sdpstr = JSON.parse(msgdata.datas);
+						console.log(sdpstr);
 						$("#connect"+msguserid).hide();
 						$("#answer"+msguserid).show();
 						try { 
