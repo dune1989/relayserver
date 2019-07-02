@@ -357,10 +357,11 @@
 				}
 			    } else {
 				obj = datas;
+				//if(obj.type !="undefined") {    
 				console.log(obj);    
 				console.log(obj.type + " " + msguserid + " => " + msgto);
 				if(msgto==global_username) {
-					//if(obj.type !="undefined") {
+					
 					    switch (obj.type) {
 						case 'ice':
 						  console.log("ice received " + JSON.stringify(obj.ice));
@@ -434,7 +435,7 @@
 						  break */
 						default:
 						  break
-					      //}
+					}
 					}
 				  }
 			    }
