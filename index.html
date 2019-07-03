@@ -377,35 +377,39 @@
 						  }
 						  break
 						case 'offer':
-							console.log("offer received " + negotiating[msguserid]);
-							var sdpstr = JSON.parse(msgdata.datas);
-							//console.log(sdpstr);
-							$("#connect"+msguserid).hide();
-							$("#answer"+msguserid).show();
-							try { 
-							    pc[msguserid].setRemoteDescription(sdpstr.sdp) //new RTCSessionDescription(data)
-							       .then(() => pc[msguserid].createAnswer())
-							       .then(answer => pc[msguserid].setLocalDescription(answer))
-							       .then(() => { 	let tmpjson = [];
-										tmpjson.sdp = pc[msguserid].localDescription;
-										send_data(tmpjson, msguserid);
-									   })
-							       .then(() => {
-								   console.log("answer given to): " + msguserid);
-								   console.log("Remote streams (get_sdp -answer): " + msguserid);
-								     $("#video"+userid).show();
-								     var streams = pc[msguserid].getRemoteStreams();
-								     for (var stream of streams) {
-								       if($("#video"+msguserid).length==0) {
-									 add_videobox(msguserid, "")
-								       }    
-								       let _friendsVideo = document.getElementById("video"+msguserid);
-								       if(stream) {
-									   _friendsVideo.srcObject = stream;                                       
-								       }
-								     }
-							       })
-							} catch(err) { console.log(err) }
+							if(typeof obj.type != "undefined" && obj.type=="offer") {    
+								console.log("offer received " + negotiating[msguserid]);
+								var sdpstr = JSON.parse(msgdata.datas);
+								//console.log(sdpstr);
+								$("#connect"+msguserid).hide();
+								$("#answer"+msguserid).show();
+								if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
+									try { 
+									    pc[msguserid].setRemoteDescription(sdpstr.sdp) //new RTCSessionDescription(data)
+									       .then(() => pc[msguserid].createAnswer())
+									       .then(answer => pc[msguserid].setLocalDescription(answer))
+									       .then(() => { 	let tmpjson = [];
+												tmpjson.sdp = pc[msguserid].localDescription;
+												send_data(tmpjson, msguserid);
+											   })
+									       .then(() => {
+										   console.log("answer given to): " + msguserid);
+										   console.log("Remote streams (get_sdp -answer): " + msguserid);
+										     $("#video"+userid).show();
+										     var streams = pc[msguserid].getRemoteStreams();
+										     for (var stream of streams) {
+										       if($("#video"+msguserid).length==0) {
+											 add_videobox(msguserid, "")
+										       }    
+										       let _friendsVideo = document.getElementById("video"+msguserid);
+										       if(stream) {
+											   _friendsVideo.srcObject = stream;                                       
+										       }
+										     }
+									       })
+									} catch(err) { console.log(err) }
+								}
+						      }    
 						      break
 						    case 'answer':
 							console.log("answer received " + negotiating[msguserid])
