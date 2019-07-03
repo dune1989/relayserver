@@ -171,7 +171,7 @@
 	  // connection is open
 	  websocket.onopen = function(ev) { 
 	      register_zone();
-	      setTimeout("send_indentity();", 100);    
+	      //setTimeout("send_indentity();", 100);    
 	      $("#terminal").html("<div>Room Connected</div>");             
 	  }
 	      
@@ -186,7 +186,9 @@
 		      var msguserid = msgdata.id;
 		      var msgto = msgdata.to;
 		      if(msguserid == 'lim'){
-			 console.log(msgdata);
+			  //if(){
+			     console.log(msgdata);
+			  //}    
 		      }  
 			  
 		      //console.log("message to: "+msgto)
