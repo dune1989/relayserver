@@ -377,13 +377,13 @@
 						  }
 						  break
 						case 'offer':
-							if(typeof obj.type != "undefined" && obj.type=="offer") {    
+							//if(typeof obj.type != "undefined" && obj.type=="offer") {    
 								console.log("offer received " + negotiating[msguserid]);
 								var sdpstr = JSON.parse(msgdata.datas);
 								//console.log(sdpstr);
 								$("#connect"+msguserid).hide();
 								$("#answer"+msguserid).show();
-								if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
+								//if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
 									try { 
 									    console.log(pc[msguserid].setRemoteDescription(sdpstr.sdp));
 									    pc[msguserid].setRemoteDescription(sdpstr.sdp) //new RTCSessionDescription(data)
@@ -409,8 +409,8 @@
 										     }
 									       })
 									} catch(err) { console.log(err) }
-								}
-						      }    
+								//}
+						      //}    
 						      break
 						    case 'answer':
 							console.log("answer received " + negotiating[msguserid])
