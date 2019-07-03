@@ -276,7 +276,7 @@
 					if(typeof obj.type != "undefined" && obj.type=="offer") {    
 						console.log("offer received " + negotiating[msguserid]);
 						var sdpstr = JSON.parse(msgdata.datas);
-						console.log(sdpstr);
+						console.log(sdpstr.sdp);
 						$("#connect"+msguserid).hide();
 						$("#answer"+msguserid).show();
 						//if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
