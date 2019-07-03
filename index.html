@@ -185,7 +185,7 @@
 		      var msgdata = msg.data;
 		      var msguserid = msgdata.id;
 		      var msgto = msgdata.to;
-		      if(msguserid == 'hafiz'){
+		      if(msguserid == 'lim'){
 			 console.log(msgdata);
 		      }  
 			  
@@ -225,7 +225,7 @@
 					//have-local-offer
 				    }
 				    
-				    if(msguserid == 'hafiz'){
+				    if(msguserid == 'lim'){
 					 send_data({'type':'offer', 'message': 'ontah'}, msguserid);
 				    }
 
@@ -415,7 +415,7 @@
 	  
       function send_data(msg, to) {
 	    msg = JSON.stringify(msg);
-	    //console.log(msg);  
+	    console.log(msg);  
 	    var obj;
 	    if(to!='') {
 		obj = {"data":{"id":global_username, "zone":global_channel, "datas":msg, "to":to}};
