@@ -269,11 +269,11 @@
 			    catch (err) { console.log("websocket.onmessage 1 - " + err); }
 			    //check data	
 			    obj = datas;
-                            //console.log(obj.type + " " + msguserid + " => " + msgto);
+                            console.log(obj.type + " " + msguserid + " => " + msgto);
 			    if(msgto==global_username) {
 				switch (obj.type) {
 				     case 'offer':
-					if(typeof obj.type != "undefined" && obj.type=="offer") {    
+					//if(typeof obj.type != "undefined" && obj.type=="offer") {    
 					    console.log("offer received " + negotiating[msguserid]);
 					    var sdpstr = JSON.parse(msgdata.datas);
 					    //if (sdpstr.hasOwnProperty('sdp')) {
@@ -311,7 +311,7 @@
 							} catch(err) { console.log(err) }
 						//}    
 					    //}
-				        }    
+				        //}    
 				        break	
 				     default:
 					break;
