@@ -336,52 +336,7 @@
 			    }                    
 			}
 			
-			if (typeof msgdata.datas!="undefined") {
-			    var datas = [];
-			    try { 
-				datas = JSON.parse(msgdata.datas);
-			    }
-			    catch (err) { console.log("websocket.onmessage 1 - " + err); }
-			    if (datas.message!=undefined) { //message 
-
-			    } else if(datas.checkin!=undefined) {
-				obj = datas.checkin;
-
-				//console.log("total user:"+users.length);
-				//if(users.length>1) {
-
-				//}
-				if(typeof obj["user"]!="undefined" && typeof obj["username"]!="undefined" && obj["user"]!=global_username) {                              
-				    //setTimeout(function(){ send_indentity(); }, 500);                              
-				    //self.postMessage({"action":"onmessage", "data":{"type":"checkin","obj":obj}});
-				}
-			    } else {
-				obj = datas;   
- 				console.log(obj);    
-				console.log(obj.type + " " + msguserid + " => " + msgto);
-				if(msgto==global_username) {
-					    switch (obj.type) {
-						case 'ice':
-						  console.log("ice received " + JSON.stringify(obj.ice));
-						  if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null) {
-					            console.log(pc[msguserid]);
-						    $("#answer"+msguserid).show();
-						    try {
-							var tempicedata = JSON.parse(obj.ice);     
-							if(typeof tempicedata.result!="undefined" && tempicedata!=undefined && tempicedata.result==true) {
-							    pc[msguserid].addIceCandidate(tempicedata);
-							    console.log("addIceCandidate " + msguserid);
-							}
-						    } catch(err) { }
-
-						  }
-						  break
-						default:
-						  break
-					}
-				  }
-			    }
-			}  
+			//was delete  
 	          } else if (msg.disconnect!=undefined) {
                       obj = msg.disconnect;   
                       var msguserid = obj.user;
