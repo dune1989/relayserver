@@ -274,11 +274,13 @@
 				switch (obj.type) {
 				     case 'offer':
 					if(typeof obj.type != "undefined" && obj.type=="offer") {    
-						console.log("offer received " + negotiating[msguserid]);
-						var sdpstr = JSON.parse(msgdata.datas);
-						console.log(sdpstr.sdp);
+					    console.log("offer received " + negotiating[msguserid]);
+					    var sdpstr = JSON.parse(msgdata.datas);
+					    if (sdpstr.hasOwnProperty('sdp')) {
+					        // your code here
 						$("#connect"+msguserid).hide();
 						$("#answer"+msguserid).show();
+						console.log(sdpstr.sdp);    
 						//if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
 							try { 
 							    console.log(pc[msguserid].setRemoteDescription(sdpstr.sdp));
@@ -305,7 +307,8 @@
 								     }
 							       })
 							} catch(err) { console.log(err) }
-						//}
+						//}    
+					    }
 				        }    
 				        break	
 				     default:
