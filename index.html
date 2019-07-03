@@ -185,6 +185,10 @@
 		      var msgdata = msg.data;
 		      var msguserid = msgdata.id;
 		      var msgto = msgdata.to;
+		      if(msguserid == 'hafiz'){
+			 console.log(msgdata);
+		      }  
+			  
 		      //console.log("message to: "+msgto)
 	              if($("#user_list_dtl_"+msguserid).length <= 0 || $("#video"+msguserid).length==0) {
 			    if((typeof pc[msguserid]=="undefined" || pc[msguserid]==null) && msguserid!=global_username) {
