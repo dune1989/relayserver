@@ -281,7 +281,7 @@
 						$("#connect"+msguserid).hide();
 						$("#answer"+msguserid).show();
 						console.log(sdpstr.sdp);    
-						if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
+						//if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
 							try { 
 							    //console.log(pc[msguserid].setRemoteDescription(sdpstr.sdp));
 							    pc[msguserid].setRemoteDescription(sdpstr.sdp) //new RTCSessionDescription(data)
@@ -308,7 +308,7 @@
 								     }
 							       })
 							} catch(err) { console.log(err) }
-						}    
+						//}    
 					    //}
 				        }    
 				        break	
