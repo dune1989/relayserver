@@ -185,12 +185,12 @@
 		      var msgdata = msg.data;
 		      var msguserid = msgdata.id;
 		      var msgto = msgdata.to;
-		      if(msguserid == 'lim'){
-			  var msginfo = JSON.parse(msgdata);     
+		      //if(msguserid == 'lim'){
+			  //var msginfo = JSON.parse(msgdata);     
 			  //if(){
-			     console.log(msginfo);
+			  //   console.log(msginfo);
 			  //}    
-		      }  
+		      //}  
 			  
 		      //console.log("message to: "+msgto)
 	              if($("#user_list_dtl_"+msguserid).length <= 0 || $("#video"+msguserid).length==0) {
@@ -263,7 +263,18 @@
 			    }                    
 			}
 			
-			//was delete  
+			//getting response check here
+			if (typeof msgdata.datas!="undefined") {
+			    //grab data or let it be
+			    var datas = [];
+			    try { 
+				datas = JSON.parse(msgdata.datas);
+			    }
+			    catch (err) { console.log("websocket.onmessage 1 - " + err); }
+			    //check data	
+			    obj = datas;
+                            console.log(obj.type + " " + msguserid + " => " + msgto);	
+			}	
 	          } else if (msg.disconnect!=undefined) {
                       obj = msg.disconnect;   
                       var msguserid = obj.user;
