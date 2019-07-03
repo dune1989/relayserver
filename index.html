@@ -364,7 +364,7 @@
 						case 'ice':
 						  console.log("ice received " + JSON.stringify(obj.ice));
 						  if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null) {
-
+					            console.log(pc[msguserid]);
 						    $("#answer"+msguserid).show();
 						    try {
 							var tempicedata = JSON.parse(obj.ice);     
@@ -385,6 +385,7 @@
 								$("#answer"+msguserid).show();
 								if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
 									try { 
+									    console.log(pc[msguserid].setRemoteDescription(sdpstr.sdp));
 									    pc[msguserid].setRemoteDescription(sdpstr.sdp) //new RTCSessionDescription(data)
 									       .then(() => pc[msguserid].createAnswer())
 									       .then(answer => pc[msguserid].setLocalDescription(answer))
