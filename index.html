@@ -281,15 +281,16 @@
 						$("#connect"+msguserid).hide();
 						$("#answer"+msguserid).show();
 						console.log(sdpstr.sdp);    
-						//if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
+						if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
 							try { 
-							    console.log(pc[msguserid].setRemoteDescription(sdpstr.sdp));
+							    //console.log(pc[msguserid].setRemoteDescription(sdpstr.sdp));
 							    pc[msguserid].setRemoteDescription(sdpstr.sdp) //new RTCSessionDescription(data)
 							       .then(() => pc[msguserid].createAnswer())
 							       .then(answer => pc[msguserid].setLocalDescription(answer))
 							       .then(() => { 	let tmpjson = [];
 										tmpjson.sdp = pc[msguserid].localDescription;
 										send_data(tmpjson, msguserid);
+									        console.log(tmpjson.sdp);
 									   })
 							       .then(() => {
 								   console.log("answer given to): " + msguserid);
@@ -307,7 +308,7 @@
 								     }
 							       })
 							} catch(err) { console.log(err) }
-						//}    
+						}    
 					    }
 				        }    
 				        break	
