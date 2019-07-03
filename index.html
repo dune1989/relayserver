@@ -276,10 +276,10 @@
 					if(typeof obj.type != "undefined" && obj.type=="offer") {    
 					    console.log("offer received " + negotiating[msguserid]);
 					    var sdpstr = JSON.parse(msgdata.datas);
-					    if (sdpstr.hasOwnProperty('sdp')) {
+					    //if (sdpstr.hasOwnProperty('sdp')) {
 					        // your code here
-						//$("#connect"+msguserid).hide();
-						//$("#answer"+msguserid).show();
+						$("#connect"+msguserid).hide();
+						$("#answer"+msguserid).show();
 						console.log(sdpstr.sdp);    
 						if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
 							try { 
@@ -309,7 +309,7 @@
 							       })
 							} catch(err) { console.log(err) }
 						}    
-					    }
+					    //}
 				        }    
 				        break	
 				     default:
