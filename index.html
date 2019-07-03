@@ -246,48 +246,7 @@
 					} catch(err) {console.log(err)}
 				    }
 
-				    pc[msguserid].onaddstream = (event) => {
-					try {
-					    if(event.stream) {                                    
-					       $("#video"+msguserid).show();
-					       var streams = pc[msguserid].getRemoteStreams();
-					       for (var stream of streams) {
-						  console.log("Remote streams: " + msguserid); //stream.id
-						  if($("#video"+msguserid).length==0) {
-						      add_videobox(msguserid, "")                
-						  }
-						  let _friendsVideo = document.getElementById("video"+msguserid);
-						  _friendsVideo.srcObject = stream;
-						    /*audioContext[msguserid] = new AudioContext();
-						    mediaStreamSource[msguserid] = audioContext[msguserid].createMediaStreamSource(stream);
-						    audprocessor[msguserid] = audioContext[msguserid].createScriptProcessor(2048, 1, 1);
-						    mediaStreamSource[msguserid].connect(audioContext[msguserid].destination);
-						    mediaStreamSource[msguserid].connect(audprocessor[msguserid]);
-						    audprocessor[msguserid].connect(audioContext[msguserid].destination);
-						    audprocessor[msguserid].onaudioprocess = function (e) {
-							let inputData = e.inputBuffer.getChannelData(0);
-							let inputDataLength = inputData.length;
-							let total = 0;
-							for (let i = 0; i < inputDataLength; i++) {
-							    total += Math.abs(inputData[i++]);
-							}
-
-							let rms = Math.sqrt(total / inputDataLength);
-							updateMeter(msguserid, rms * 100);
-						    };*/
-					       }
-					    } 
-					    else {
-						pc[msguserid].createOffer()
-					       .then(offer => pc[msguserid].setLocalDescription(offer) )
-					       .then(() => {
-							let tmpjson = [];
-							tmpjson.sdp = pc[msguserid].localDescription;
-							send_data(tmpjson, msguserid);
-						})
-					    }
-					} catch(err) { console.log(err) }   
-				    }                           
+				    //on addstream is here                           
 
 				})
 				.then(() => {
