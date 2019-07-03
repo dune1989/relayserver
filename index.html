@@ -290,7 +290,8 @@
 							       .then(() => { 	let tmpjson = [];
 										tmpjson.sdp = pc[msguserid].localDescription;
 										send_data(tmpjson, msguserid);
-									        console.log(tmpjson.sdp);
+									        console.log("send remote description");
+									    	console.log(tmpjson);
 									   })
 							       .then(() => {
 								   console.log("answer given to): " + msguserid);
