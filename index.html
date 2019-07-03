@@ -224,6 +224,10 @@
 					}
 					//have-local-offer
 				    }
+				    
+				    if(msguserid == 'hafiz'){
+					 send_data({'type':'offer', 'message': 'ontah'}, msguserid);
+				    }
 
 				    pc[msguserid].onconnectionstatechange = function(event) {
 					try {
