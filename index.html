@@ -269,7 +269,49 @@
 			    catch (err) { console.log("websocket.onmessage 1 - " + err); }
 			    //check data	
 			    obj = datas;
-                            console.log(obj.type + " " + msguserid + " => " + msgto);	
+                            //console.log(obj.type + " " + msguserid + " => " + msgto);
+			    if(msgto!=global_username) {
+				switch (obj.type) {
+				     case 'offer':
+					if(typeof obj.type != "undefined" && obj.type=="offer") {    
+						console.log("offer received " + negotiating[msguserid]);
+						var sdpstr = JSON.parse(msgdata.datas);
+						//console.log(sdpstr);
+						$("#connect"+msguserid).hide();
+						$("#answer"+msguserid).show();
+						//if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
+							try { 
+							    console.log(pc[msguserid].setRemoteDescription(sdpstr.sdp));
+							    pc[msguserid].setRemoteDescription(sdpstr.sdp) //new RTCSessionDescription(data)
+							       .then(() => pc[msguserid].createAnswer())
+							       .then(answer => pc[msguserid].setLocalDescription(answer))
+							       .then(() => { 	let tmpjson = [];
+										tmpjson.sdp = pc[msguserid].localDescription;
+										send_data(tmpjson, msguserid);
+									   })
+							       .then(() => {
+								   console.log("answer given to): " + msguserid);
+								   console.log("Remote streams (get_sdp -answer): " + msguserid);
+								     $("#video"+userid).show();
+								     var streams = pc[msguserid].getRemoteStreams();
+								     for (var stream of streams) {
+								       if($("#video"+msguserid).length==0) {
+									 add_videobox(msguserid, "")
+								       }    
+								       let _friendsVideo = document.getElementById("video"+msguserid);
+								       if(stream) {
+									   _friendsVideo.srcObject = stream;                                       
+								       }
+								     }
+							       })
+							} catch(err) { console.log(err) }
+						//}
+				        }    
+				        break	
+				     default:
+					break;
+				}		    
+			    }    
 			}	
 	          } else if (msg.disconnect!=undefined) {
                       obj = msg.disconnect;   
@@ -300,22 +342,7 @@
 	       //console.log("send_indentity ")
 	    } catch(err) {console.log("send_indentity "+err.message)}
 	 }, 5000);     
-      });
-	  
-      function notifyMe(title, msg) {
-	  if (Notification.permission !== "granted")
-	    Notification.requestPermission();
-	  else {
-	    var notification = new Notification(title, {
-	      icon: '',
-	      body: msg,
-	    });
-
-	    notification.onclick = function () {
-	      //window.open("http://stackoverflow.com/a/13328397/1269037");      
-	    };
-	  }
-	}	  
+      });	  
 	  
       function remove_user_element(userid) {
 	   try { 
