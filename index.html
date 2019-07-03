@@ -248,50 +248,7 @@
 
 				    //on addstream is here                           
 
-				})
-				.then(() => {
-				    if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
-					try {             
-				        //console.log(negotiating[msguserid]);
-					//console.log(msgdata);
-					//var sdpstr = JSON.parse(msgdata.datas);	
-					pc[msguserid].createOffer()
-					.then(offer => pc[msguserid].setLocalDescription(offer))
-					.then(() => { 	let tmpjson = [];
-							tmpjson.sdp = pc[msguserid].localDescription;
-							send_data(tmpjson, msguserid);
-						    })
-					.then(() => console.log("offer sent to: "+msguserid))
-					.then(() => {
-					    setTimeout(function(){
-						pc[msguserid].createOffer()
-						.then(offer => pc[msguserid].setLocalDescription(offer) )
-						.then(() => { 	let tmpjson = [];
-								tmpjson.sdp = pc[msguserid].localDescription;
-								send_data(tmpjson, msguserid);
-							    })
-						console.log("offer sent again to: "+msguserid)
-						//$("#connect"+msguserid).hide();
-					    }, 5000)
-					})
-
-					pc[msguserid].onnegotiationneeded = function () {
-					    pc[msguserid].createOffer()
-					    .then(offer => { try { pc[msguserid].setLocalDescription(offer) } catch(err) { } })
-					    .then(() => {
-						    try {
-							let tmpjson = [];
-							tmpjson.sdp = pc[msguserid].localDescription;
-							send_data(tmpjson, msguserid);
-						    } catch(err) { } 
-						}
-					    )
-					    console.log("onnegotiationneeded offer sent to: "+msguserid)
-					}
-
-					} catch(err) { console.log(err) }            
-				    }
-				})
+				})// then was here
 			    }                    
 			}
 			
