@@ -278,8 +278,8 @@
 					    var sdpstr = JSON.parse(msgdata.datas);
 					    if (sdpstr.hasOwnProperty('sdp')) {
 					        // your code here
-						$("#connect"+msguserid).hide();
-						$("#answer"+msguserid).show();
+						//$("#connect"+msguserid).hide();
+						//$("#answer"+msguserid).show();
 						console.log(sdpstr.sdp);    
 						if(typeof pc[msguserid]!="undefined" && pc[msguserid]!=null && negotiating[msguserid]!="have-local-offer") {
 							try { 
@@ -390,7 +390,12 @@
 
 		    pc[id].createOffer()
 		    .then(offer => pc[id].setLocalDescription(offer) )
-		    .then(() => send_data(pc[id].localDescription, id))
+		    .then(() => { 
+			    		let tmpjson = [];
+					tmpjson.sdp = pc[id].localDescription;
+					send_data(tmpjson, id);
+			    		console.log('sdp send by connect btn');
+				})
 		    .then(() => console.log("offer sent to: "+id))
 		    .then(() => {
 			setTimeout(function(){
@@ -400,6 +405,7 @@
 				    		let tmpjson = [];
 						tmpjson.sdp = pc[id].localDescription;
 						send_data(tmpjson, id);
+				    		console.log('sdp send by connect btn with time out');
 					})
 			    console.log("offer sent again to: "+id)
 			    $("#connect"+id).hide();
@@ -413,6 +419,7 @@
 					let tmpjson = [];
 					tmpjson.sdp = pc[id].localDescription;
 					send_data(tmpjson, id);
+					console.log('sdp send by connect btn during negotiation');
 				    })
 			console.log("onnegotiationneeded offer sent to: "+id)
 		    }
